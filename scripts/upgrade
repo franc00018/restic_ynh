@@ -30,11 +30,9 @@ export data=$(ynh_app_setting_get $app data)
 export apps=$(ynh_app_setting_get $app apps)
 export allow_extra_space_use=$(ynh_app_setting_get $app allow_extra_space_use)
 
-
 #=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
@@ -64,12 +62,14 @@ fi
 # INSTALL RESTIC
 #=================================================
 ynh_script_progression --message="Installing restic binary" --weight=7
+
 install_restic
 
 #=================================================
 # CREATE APP USER
 #=================================================
 ynh_script_progression --message="Creating user ${app}"
+
 id ${app} 2>/dev/null || useradd -m ${app}
 ynh_script_progression --message="Configure ${app} user sudoer rights"
 cat > /tmp/${app}_sudoer << EOSUDOER
@@ -106,6 +106,7 @@ chown -R ${app}: /home/${app}
 # ACTIVATE BACKUP METHODS
 #=================================================
 ynh_script_progression --message="Activating backup methods"
+
 mkdir -p /etc/yunohost/hooks.d/backup_method
 mkdir -p /usr/share/yunohost/backup_method
 
@@ -113,6 +114,7 @@ mkdir -p /usr/share/yunohost/backup_method
 # SETUP THE BACKUP METHOD
 #=================================================
 ynh_script_progression --message="Setting up backup methods"
+
 ynh_configure backup_method "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 ynh_configure check_method "${final_path}/check_method_${app}"
 
@@ -120,6 +122,7 @@ ynh_configure check_method "${final_path}/check_method_${app}"
 # SETUP LOG SCRIPTS
 #=================================================
 ynh_script_progression --message="Setting up backup log script"
+
 ynh_configure restic_log "${final_path}/restic_log_${app}"
 chmod +x "${final_path}/restic_log_${app}"
 chown ${app}: "${final_path}/restic_log_${app}"
@@ -133,6 +136,7 @@ chown ${app}: "${final_path}/restic_check_log_${app}"
 # CONFIGURE CRON
 #=================================================
 ynh_script_progression --message="Configuring cron" --weight=5
+
 ynh_configure backup-with-restic "/usr/local/bin/backup-with-${app}"
 ynh_configure check-restic "${final_path}/check-${app}"
 chmod +x "/usr/local/bin/backup-with-${app}"
@@ -189,6 +193,7 @@ fi
 # SETUP LOGROTATE
 #=================================================
 ynh_script_progression --message="Configuring logrotate"
+
 ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.log
 ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.err
 ynh_use_logrotate --logfile=/var/log/restic_check_${app}.log
