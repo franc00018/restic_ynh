@@ -170,7 +170,7 @@ $(cat ${private_key}.pub)"
 # SEND A README FOR THE ADMIN
 #=================================================
 ynh_script_progression --message="Sending post-installation instructions to admin" --last
-ynh_print_OFF
+
 message="You should now allow the following public key for user ${ssh_user} on server ${server}:
 $(cat ${private_key}.pub)
 
@@ -188,7 +188,6 @@ $(if [ "$backup_path" != "./" ];then echo "Also make sure ${backup_path} exists 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/restic_ynh"
 
 ynh_send_readme_to_admin "$message" "root"
-ynh_print_ON
 
 #=================================================
 # END OF SCRIPT
