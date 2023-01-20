@@ -76,6 +76,7 @@ ynh_configure check_method "${final_path}/check_method_${app}"
 # SETUP LOG SCRIPTS
 #=================================================
 ynh_script_progression --message="Setting up backup log script"
+
 ynh_configure restic_log "${final_path}/restic_log_${app}"
 chmod +x "${final_path}/restic_log_${app}"
 chown ${app}: "${final_path}/restic_log_${app}"
@@ -133,6 +134,7 @@ ynh_use_logrotate --logfile=/var/log/restic_check_${app}.err
 # GENERATE SSH KEY
 #=================================================
 ynh_script_progression --message="Generating private key"
+
 ssh_dir="/root/.ssh"
 if [ ! -d "${ssh_dir}" ];then
   mkdir -p "${ssh_dir}"
@@ -164,12 +166,11 @@ ynh_script_progression --message="You should now allow the following public key 
 
 $(cat ${private_key}.pub)"
 
-
 #=================================================
 # SEND A README FOR THE ADMIN
 #=================================================
 ynh_script_progression --message="Sending post-installation instructions to admin" --last
-ynh_print_OFF
+
 message="You should now allow the following public key for user ${ssh_user} on server ${server}:
 $(cat ${private_key}.pub)
 
@@ -187,7 +188,6 @@ $(if [ "$backup_path" != "./" ];then echo "Also make sure ${backup_path} exists 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/restic_ynh"
 
 ynh_send_readme_to_admin "$message" "root"
-ynh_print_ON
 
 #=================================================
 # END OF SCRIPT

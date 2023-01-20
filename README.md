@@ -5,15 +5,13 @@ It shall NOT be edited by hand.
 
 # Restic for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Working status](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)  
 [![Install Restic with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
 *[Lire ce readme en français.](./README_fr.md)*
 
 > *This package allows you to install Restic quickly and simply on a YunoHost server.
 If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
-
-## Overview
 
 ## Overview
 
@@ -25,9 +23,6 @@ The package does not handle local backups yet but you can work around that by us
 
 
 **Shipped version:** 0.12.0~ynh9
-
-
-
 ## Disclaimers / important information
 
 ## Usage
@@ -176,21 +171,22 @@ You can setup the Restic app several times on the same server so you can backup 
 
 ## Documentation and resources
 
-* Official app website: https://restic.net
-* Official admin documentation: https://restic.readthedocs.io/en/latest/
-* Upstream app code repository: https://github.com/restic/restic
-* YunoHost documentation for this app: https://yunohost.org/app_restic
-* Report a bug: https://github.com/YunoHost-Apps/restic_ynh/issues
+* Official app website: <https://restic.net>
+* Official admin documentation: <https://restic.readthedocs.io/en/latest/>
+* Upstream app code repository: <https://github.com/restic/restic>
+* YunoHost documentation for this app: <https://yunohost.org/app_restic>
+* Report a bug: <https://github.com/YunoHost-Apps/restic_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/restic_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade restic -u https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
