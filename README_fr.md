@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # Restic pour YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)  
+[![Niveau d’intégration](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+
 [![Installer Restic avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
 *[Read this readme in english.](./README.md)*
@@ -174,7 +175,7 @@ You can setup the Restic app several times on the same server so you can backup 
 * Site officiel de l’app : <https://restic.net>
 * Documentation officielle de l’admin : <https://restic.readthedocs.io/en/latest/>
 * Dépôt de code officiel de l’app : <https://github.com/restic/restic>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_restic>
+* YunoHost Store: <https://apps.yunohost.org/app/restic>
 * Signaler un bug : <https://github.com/YunoHost-Apps/restic_ynh/issues>
 
 ## Informations pour les développeurs

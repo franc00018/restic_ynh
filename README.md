@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # Restic for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Working status](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Working status](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+
 [![Install Restic with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -174,7 +175,7 @@ You can setup the Restic app several times on the same server so you can backup 
 * Official app website: <https://restic.net>
 * Official admin documentation: <https://restic.readthedocs.io/en/latest/>
 * Upstream app code repository: <https://github.com/restic/restic>
-* YunoHost documentation for this app: <https://yunohost.org/app_restic>
+* YunoHost Store: <https://apps.yunohost.org/app/restic>
 * Report a bug: <https://github.com/YunoHost-Apps/restic_ynh/issues>
 
 ## Developer info
