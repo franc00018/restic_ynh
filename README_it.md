@@ -1,20 +1,20 @@
 <!--
-Nota bene : ce README est automatiquement généré par <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
-Il NE doit PAS être modifié à la main.
+N.B.: Questo README è stato automaticamente generato da <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
+NON DEVE essere modificato manualmente.
 -->
 
-# Restic pour YunoHost
+# Restic per YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+[![Livello di integrazione](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Stato di funzionamento](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Stato di manutenzione](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
 
-[![Installer Restic avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
+[![Installa Restic con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
-*[Lire le README dans d'autres langues.](./ALL_README.md)*
+*[Leggi questo README in altre lingue.](./ALL_README.md)*
 
-> *Ce package vous permet d’installer Restic rapidement et simplement sur un serveur YunoHost.*  
-> *Si vous n’avez pas YunoHost, consultez [ce guide](https://yunohost.org/install) pour savoir comment l’installer et en profiter.*
+> *Questo pacchetto ti permette di installare Restic su un server YunoHost in modo semplice e veloce.*  
+> *Se non hai YunoHost, consulta [la guida](https://yunohost.org/install) per imparare a installarlo.*
 
-## Vue d’ensemble
+## Panoramica
 
 A [Restic](https://restic.net/) package for YunoHost (heavily inspired by [the Borg package](https://github.com/YunoHost-Apps/borg_ynh/)).
 
@@ -23,8 +23,8 @@ This package uses restic to make backups to a sftp server.
 The package does not handle local backups yet but you can work around that by using the local sftp server as target server (see my comment [here](https://forum.yunohost.org/t/sauvegarde-yunohost-avec-restic/10275/33)).
 
 
-**Version incluse :** 0.12.0~ynh9
-## Avertissements / informations importantes
+**Versione pubblicata:** 0.12.0~ynh9
+## Attenzione/informazioni importanti
 
 ## Usage
 
@@ -170,24 +170,24 @@ systemctl start restic_check_read_data.service
 You can setup the Restic app several times on the same server so you can backup on several server or manage your frequency backup differently for specific part of your server.
 
 
-## Documentations et ressources
+## Documentazione e risorse
 
-- Site officiel de l’app : <https://restic.net>
-- Documentation officielle de l’admin : <https://restic.readthedocs.io/en/latest/>
-- Dépôt de code officiel de l’app : <https://github.com/restic/restic>
-- YunoHost Store : <https://apps.yunohost.org/app/restic>
-- Signaler un bug : <https://github.com/YunoHost-Apps/restic_ynh/issues>
+- Sito web ufficiale dell’app: <https://restic.net>
+- Documentazione ufficiale per gli amministratori: <https://restic.readthedocs.io/en/latest/>
+- Repository upstream del codice dell’app: <https://github.com/restic/restic>
+- Store di YunoHost: <https://apps.yunohost.org/app/restic>
+- Segnala un problema: <https://github.com/YunoHost-Apps/restic_ynh/issues>
 
-## Informations pour les développeurs
+## Informazioni per sviluppatori
 
-Merci de faire vos pull request sur la [branche `testing`](https://github.com/YunoHost-Apps/restic_ynh/tree/testing).
+Si prega di inviare la tua pull request alla [branch di `testing`](https://github.com/YunoHost-Apps/restic_ynh/tree/testing).
 
-Pour essayer la branche `testing`, procédez comme suit :
+Per provare la branch di `testing`, si prega di procedere in questo modo:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
-ou
+o
 sudo yunohost app upgrade restic -u https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
 ```
 
-**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
+**Maggiori informazioni riguardo il pacchetto di quest’app:** <https://yunohost.org/packaging_apps>

@@ -1,20 +1,20 @@
 <!--
-Nota bene : ce README est automatiquement généré par <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
-Il NE doit PAS être modifié à la main.
+NOTA: Este README foi creado automáticamente por <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
+NON debe editarse manualmente.
 -->
 
-# Restic pour YunoHost
+# Restic para YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+[![Nivel de integración](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
 
-[![Installer Restic avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
+[![Instalar Restic con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
-*[Lire le README dans d'autres langues.](./ALL_README.md)*
+*[Le este README en outros idiomas.](./ALL_README.md)*
 
-> *Ce package vous permet d’installer Restic rapidement et simplement sur un serveur YunoHost.*  
-> *Si vous n’avez pas YunoHost, consultez [ce guide](https://yunohost.org/install) pour savoir comment l’installer et en profiter.*
+> *Este paquete permíteche instalar Restic de xeito rápido e doado nun servidor YunoHost.*  
+> *Se non usas YunoHost, le a [documentación](https://yunohost.org/install) para saber como instalalo.*
 
-## Vue d’ensemble
+## Vista xeral
 
 A [Restic](https://restic.net/) package for YunoHost (heavily inspired by [the Borg package](https://github.com/YunoHost-Apps/borg_ynh/)).
 
@@ -23,8 +23,8 @@ This package uses restic to make backups to a sftp server.
 The package does not handle local backups yet but you can work around that by using the local sftp server as target server (see my comment [here](https://forum.yunohost.org/t/sauvegarde-yunohost-avec-restic/10275/33)).
 
 
-**Version incluse :** 0.12.0~ynh9
-## Avertissements / informations importantes
+**Versión proporcionada:** 0.12.0~ynh9
+## Avisos / información importante
 
 ## Usage
 
@@ -170,19 +170,19 @@ systemctl start restic_check_read_data.service
 You can setup the Restic app several times on the same server so you can backup on several server or manage your frequency backup differently for specific part of your server.
 
 
-## Documentations et ressources
+## Documentación e recursos
 
-- Site officiel de l’app : <https://restic.net>
-- Documentation officielle de l’admin : <https://restic.readthedocs.io/en/latest/>
-- Dépôt de code officiel de l’app : <https://github.com/restic/restic>
-- YunoHost Store : <https://apps.yunohost.org/app/restic>
-- Signaler un bug : <https://github.com/YunoHost-Apps/restic_ynh/issues>
+- Web oficial da app: <https://restic.net>
+- Documentación oficial para admin: <https://restic.readthedocs.io/en/latest/>
+- Repositorio de orixe do código: <https://github.com/restic/restic>
+- Tenda YunoHost: <https://apps.yunohost.org/app/restic>
+- Informar dun problema: <https://github.com/YunoHost-Apps/restic_ynh/issues>
 
-## Informations pour les développeurs
+## Info de desenvolvemento
 
-Merci de faire vos pull request sur la [branche `testing`](https://github.com/YunoHost-Apps/restic_ynh/tree/testing).
+Envía a túa colaboración á [rama `testing`](https://github.com/YunoHost-Apps/restic_ynh/tree/testing).
 
-Pour essayer la branche `testing`, procédez comme suit :
+Para probar a rama `testing`, procede deste xeito:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
@@ -190,4 +190,4 @@ ou
 sudo yunohost app upgrade restic -u https://github.com/YunoHost-Apps/restic_ynh/tree/testing --debug
 ```
 
-**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
+**Máis info sobre o empaquetado da app:** <https://yunohost.org/packaging_apps>
