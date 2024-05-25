@@ -46,7 +46,8 @@ fi
 #=================================================
 ynh_script_progression --message="Installing restic binary" --weight=7
 
-install_restic
+ynh_setup_source --source_id=main --dest_dir="$install_dir"
+chmod +x "$install_dir/restic"
 
 #=================================================
 # CREATE APP USER

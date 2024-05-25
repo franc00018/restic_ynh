@@ -8,11 +8,6 @@ RESTIC_VERSION="0.16.2"
 
 systemd_services_suffixes=( "" "_check" "_check_read_data" )
 
-# Install restic if restic is not here
-install_restic () {
-    ynh_setup_source --source_id=main --dest_dir="$install_dir"
-    chmod +x "$install_dir/restic"
-}
 
 _gen_and_save_public_key() {
     public_key=""
