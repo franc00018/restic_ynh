@@ -18,23 +18,6 @@ ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 #ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
-
-# Backup the current version of the app
-#REMOVEME? ynh_backup_before_upgrade
-#REMOVEME? ynh_clean_setup () {
-	ynh_clean_check_starting
-	# Restore it if the upgrade fails
-#REMOVEME? 	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
-
 if grep "${app}.timer" /etc/yunohost/services.yml > /dev/null ; then
     yunohost service remove $app.timer
     ynh_systemd_action --service="$app.timer" --action="enable"
