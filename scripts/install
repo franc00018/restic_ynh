@@ -35,24 +35,24 @@ mkdir -p /etc/yunohost/hooks.d/backup_method
 mkdir -p /usr/share/yunohost/backup_method
 
 ## Backup method
-_ynh_add_config_j2 --template="backup_method" --destination="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
+_ynh_add_config_j2 --template="backup_method.j2" --destination="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 chmod go=--- "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 
-_ynh_add_config_j2 --template="backup-with-restic" --destination="$install_dir/backup-with-${app}"
+_ynh_add_config_j2 --template="backup-with-restic.j2" --destination="$install_dir/backup-with-${app}"
 chmod u+x "$install_dir/backup-with-restic"
 
 ## Check method
-_ynh_add_config_j2 --template="check_method" --destination="$install_dir/check_method_${app}"
+_ynh_add_config_j2 --template="check_method.j2" --destination="$install_dir/check_method_${app}"
 
-_ynh_add_config_j2 --template="check-restic" --destination="$install_dir/check-${app}"
+_ynh_add_config_j2 --template="check-restic.j2" --destination="$install_dir/check-${app}"
 chmod u+x "$install_dir/check-$app"
 
 ## Backup log script
-_ynh_add_config_j2 --template="restic_log" --destination="${install_dir}/restic_log_${app}"
+_ynh_add_config_j2 --template="restic_log.j2" --destination="${install_dir}/restic_log_${app}"
 chmod u+x "$install_dir/restic_log_${app}"
 
 # Check log script
-_ynh_add_config_j2 --template="restic_check_log" --destination="${install_dir}/restic_check_log_${app}"
+_ynh_add_config_j2 --template="restic_check_log.j2" --destination="${install_dir}/restic_check_log_${app}"
 chmod u+x "$install_dir/restic_check_log_${app}"
 
 chown -R "$app:$app" "$install_dir"
@@ -65,7 +65,7 @@ ynh_script_progression --message="Adding system configurations related to $app..
 # Systemd services and timers
 for suffix in "${systemd_services_suffixes[@]}"; do
     ynh_add_systemd_config --service="$app$suffix" --template="systemd$suffix.service"
-    _ynh_add_config_j2 --template="systemd$suffix.timer" --destination="/etc/systemd/system/$app$suffix.timer"
+    _ynh_add_config_j2 --template="systemd$suffix.timer.j2" --destination="/etc/systemd/system/$app$suffix.timer"
     systemctl disable --quiet "${app}$suffix.service"
     systemctl enable --quiet "${app}$suffix.time"
     systemctl start --quiet "${app}$suffix.time"
