@@ -67,9 +67,9 @@ ynh_script_progression --message="Adding system configurations related to $app..
 for suffix in "${systemd_services_suffixes[@]}"; do
     ynh_add_systemd_config --service="$app$suffix" --template="systemd$suffix.service"
     _ynh_add_config_j2 --template="systemd$suffix.timer.j2" --destination="/etc/systemd/system/$app$suffix.timer"
-    ynh_systemd_action --service="${app}$suffix.service" --action="disable"
+    ynh_systemd_action --service_name="${app}$suffix.service" --action="disable"
     systemctl enable --quiet "${app}$suffix.timer"
-    ynh_systemd_action --service="${app}$suffix.timer" --action="start"
+    ynh_systemd_action --service_name="${app}$suffix.timer" --action="start"
 
     yunohost service add "$app$suffix" --description="Restic backup program ($app$suffix)" \
         --test_status="systemctl show $app$suffix.service  -p ActiveState --value | grep -v failed"
