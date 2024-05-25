@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,46 +8,31 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
+# STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-export app=$YNH_APP_INSTANCE_NAME
-
-export final_path="/opt/yunohost/${app}"
-export server=$(ynh_app_setting_get $app server)
-export port=$(ynh_app_setting_get $app port)
-export ssh_user=$(ynh_app_setting_get $app ssh_user)
-export backup_path=$(ynh_app_setting_get $app backup_path)
-export passphrase=$(ynh_app_setting_get $app passphrase)
-export on_calendar=$(ynh_app_setting_get $app on_calendar)
-export check_on_calendar=$(ynh_app_setting_get $app check_on_calendar)
-export check_read_data_on_calendar=$(ynh_app_setting_get $app check_read_data_on_calendar)
-export conf=$(ynh_app_setting_get $app conf)
-export data=$(ynh_app_setting_get $app data)
-export apps=$(ynh_app_setting_get $app apps)
-export allow_extra_space_use=$(ynh_app_setting_get $app allow_extra_space_use)
+ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 
 #=================================================
-# CHECK VERSION
+# ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+#ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
-upgrade_type=$(ynh_check_app_version_changed)
+
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
+#REMOVEME? ynh_backup_before_upgrade
+#REMOVEME? ynh_clean_setup () {
 	ynh_clean_check_starting
 	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
+#REMOVEME? 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 
 if grep "${app}.timer" /etc/yunohost/services.yml > /dev/null ; then
@@ -73,7 +56,7 @@ ynh_script_progression --message="Creating user ${app}"
 id ${app} 2>/dev/null || useradd -m ${app}
 ynh_script_progression --message="Configure ${app} user sudoer rights"
 cat > /tmp/${app}_sudoer << EOSUDOER
-${app} ALL = (root) NOPASSWD: /usr/bin/yunohost*, /bin/journalctl*, /usr/bin/find /etc/yunohost/apps -name backup, ${final_path}/check_method_${app}
+${app} ALL = (root) NOPASSWD: /usr/bin/yunohost*, /bin/journalctl*, /usr/bin/find /etc/yunohost/apps -name backup, ${install_dir}/check_method_${app}
 EOSUDOER
 visudo -cf /tmp/${app}_sudoer && mv /tmp/${app}_sudoer /etc/sudoers.d/${app}
 ynh_script_progression --message="Move ssh keys from root to ${app} user's home"
@@ -116,21 +99,21 @@ mkdir -p /usr/share/yunohost/backup_method
 ynh_script_progression --message="Setting up backup methods"
 
 ynh_configure backup_method "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
-ynh_configure check_method "${final_path}/check_method_${app}"
+ynh_configure check_method "${install_dir}/check_method_${app}"
 
 #=================================================
 # SETUP LOG SCRIPTS
 #=================================================
 ynh_script_progression --message="Setting up backup log script"
 
-ynh_configure restic_log "${final_path}/restic_log_${app}"
-chmod +x "${final_path}/restic_log_${app}"
-chown ${app}: "${final_path}/restic_log_${app}"
+ynh_configure restic_log "${install_dir}/restic_log_${app}"
+chmod +x "${install_dir}/restic_log_${app}"
+chown ${app}: "${install_dir}/restic_log_${app}"
 
 ynh_script_progression --message="Setting up check log script"
-ynh_configure restic_check_log "${final_path}/restic_check_log_${app}"
-chmod +x "${final_path}/restic_check_log_${app}"
-chown ${app}: "${final_path}/restic_check_log_${app}"
+ynh_configure restic_check_log "${install_dir}/restic_check_log_${app}"
+chmod +x "${install_dir}/restic_check_log_${app}"
+chown ${app}: "${install_dir}/restic_check_log_${app}"
 
 #=================================================
 # CONFIGURE CRON
@@ -138,11 +121,11 @@ chown ${app}: "${final_path}/restic_check_log_${app}"
 ynh_script_progression --message="Configuring cron" --weight=5
 
 ynh_configure backup-with-restic "/usr/local/bin/backup-with-${app}"
-ynh_configure check-restic "${final_path}/check-${app}"
+ynh_configure check-restic "${install_dir}/check-${app}"
 chmod +x "/usr/local/bin/backup-with-${app}"
 chown ${app}: "/usr/local/bin/backup-with-${app}"
-chmod +x "${final_path}/check-${app}"
-chmod +x "${final_path}/check_method_${app}"
+chmod +x "${install_dir}/check-${app}"
+chmod +x "${install_dir}/check_method_${app}"
 ynh_add_systemd_config --service=${app} --template=systemd.service
 ynh_add_systemd_config --service=${app}_check --template=systemd_check.service
 ynh_add_systemd_config --service=${app}_check_read_data --template=systemd_check_read_data.service

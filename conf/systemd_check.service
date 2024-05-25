@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=__FINALPATH__/check-__APP__
+ExecStart=__INSTALL_DIR__/check-__APP__
 ExecStartPost=/opt/yunohost/__APP__/restic_check_log___APP__ 0
 User=__APP__
 Group=__APP__

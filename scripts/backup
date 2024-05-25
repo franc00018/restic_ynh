@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -11,44 +9,32 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_print_info --message="Loading installation settings..."
-
-export app=$YNH_APP_INSTANCE_NAME
-export final_path="/opt/yunohost/${app}"
-
-#=================================================
 # DECLARE DATA AND CONF FILES TO BACKUP
 #=================================================
 ynh_print_info --message="Declaring files to be backed up..."
 
+#=================================================
+# BACKUP THE APP MAIN DIR
+#=================================================
+
+ynh_backup --src_path="$install_dir"
 
 #=================================================
-# BACKUP VARIOUS FILES
+# SYSTEM CONFIGURATION
 #=================================================
 
-ynh_backup "/usr/local/bin/backup-with-$app"
-ynh_backup "/etc/systemd/system/$app.service"
-ynh_backup "/etc/systemd/system/$app.timer"
-ynh_backup "/etc/systemd/system/${app}_check.service"
-ynh_backup "/etc/systemd/system/${app}_check.timer"
-ynh_backup "/etc/systemd/system/${app}_check_read_data.service"
-ynh_backup "/etc/systemd/system/${app}_check_read_data.timer"
-ynh_backup "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
-ynh_backup "${final_path}/check_method_${app}"
-ynh_backup "${final_path}/restic_log_${app}"
-ssh_dir="/root/.ssh"
-ynh_backup "${ssh_dir}/id_${app}_ed25519"
-ynh_backup "${ssh_dir}/id_${app}_ed25519.pub"
-ynh_backup "${ssh_dir}/config"
+for suffix in "${systemd_services_suffixes[@]}"; do
+    ynh_backup --src_path="/etc/systemd/system/$app$suffix.timer"
+    ynh_backup --src_path="/etc/systemd/system/$app$suffix.service"
+done
+
+ynh_backup --src_path="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
+ynh_backup --src_path="/etc/sudoers.d/$app"
+
+ynh_backup --src_path="/root/.ssh/id_${app}_ed25519"
+ynh_backup --src_path="/root/.ssh/id_${app}_ed25519.pub"
+# FIXME: uh do we really want to backup it all?
+ynh_backup --src_path="/root/.ssh/config"
 
 #=================================================
 # END OF SCRIPT

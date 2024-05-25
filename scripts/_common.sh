@@ -3,132 +3,88 @@
 #=================================================
 # COMMON VARIABLES
 #=================================================
-# App package root directory should be the parent folder
-PKG_DIR=$(cd ../; pwd)
+
 RESTIC_VERSION="0.16.2"
+
+systemd_services_suffixes=( "" "_check" "_check_read_data" )
 
 # Install restic if restic is not here
 install_restic () {
-  architecture=$(uname -m)
-  arch=''
-  case $architecture in
-    i386|i686)
-      arch="386"
-      ;;
-    x86_64)
-      arch=amd64
-      ;;
-    armv*)
-      arch=arm
-      ;;
-    aarch64)
-      arch=arm64
-      ;;
-    *)
-      echo
-      ynh_die --message="Unsupported architecture \"$architecture\""
-      ;;
-  esac
-  wget https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${arch}.bz2 -O /tmp/restic.bz2 2>&1 >/dev/null
-  wget https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/SHA256SUMS -O /tmp/restic-sha256sums 2>&1 >/dev/null
-  expected_sum=$(grep restic_${RESTIC_VERSION}_linux_${arch}.bz2 /tmp/restic-sha256sums | awk '{print $1}')
-  sum=$(sha256sum /tmp/restic.bz2 | awk '{print $1}')
-  if [ "$sum" == "$expected_sum" ];then
-    pkill restic || true
-    bunzip2 /tmp/restic.bz2 -f -c > /usr/local/bin/${app}
-    chmod +x /usr/local/bin/${app}
-  else
-    ynh_die --message="\nDownloaded file does not match expected sha256 sum, aborting"
-  fi
+    ynh_setup_source --source_id=main --dest_dir="$install_dir"
+    chmod +x "$install_dir/restic"
 }
+
+_gen_and_save_public_key() {
+    public_key=""
+
+    if [[ -n "$server" ]]; then
+        private_key="/root/.ssh/id_${app}_ed25519"
+        if [ ! -f "$private_key" ]; then
+            ssh-keygen -q -t ed25519 -N "" -f "$private_key"
+        fi
+        public_key=$(cat "$private_key.pub")
+    fi
+
+    ynh_app_setting_set --app="$app" --key=public_key --value="$public_key"
+}
+
+_set_ssh_config() {
+    if grep -q "$app" "/root/.ssh/config" 2>/dev/null; then
+        return 0
+    fi
+
+    cat << EOCONF >> /root/.ssh/config
+# begin $app ssh config
+Host ${server}
+  Hostname ${server}
+  Port ${port}
+  User ${ssh_user}
+  IdentityFile ${private_key}
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+# end $app ssh config
+EOCONF
+
+}
+
 
 #=================================================
 # COMMON HELPERS
 #=================================================
-ynh_export () {
-  local ynh_arg=""
-  for var in $@;
-  do
-    ynh_arg=$(echo $var | awk '{print toupper($0)}')
-    if [ "$var" == "path_url" ]; then
-      ynh_arg="PATH"
+
+_ynh_add_config_j2() {
+    # Declare an array to define the options of this helper.
+    local legacy_args=tdv
+    local -A args_array=([t]=template= [d]=destination=)
+    local template
+    local destination
+    # Manage arguments with getopts
+    ynh_handle_getopts_args "$@"
+    local template_path
+
+    if [ -f "$YNH_APP_BASEDIR/conf/$template" ]; then
+        template_path="$YNH_APP_BASEDIR/conf/$template"
+    elif [ -f "$template" ]; then
+        template_path=$template
+    else
+        ynh_die --message="The provided template $template doesn't exist"
     fi
-    ynh_arg="YNH_APP_ARG_$ynh_arg"
-    export $var="${!ynh_arg}"
-  done
-}
-# Save listed var in YunoHost app settings
-# usage: ynh_save_args VARNAME1 [VARNAME2 [...]]
-ynh_save_args () {
-  for var in $@;
-  do
-    local setting_var="$var"
-    if [ "$var" == "path_url" ]; then
-      setting_var="path"
-    fi
-    ynh_app_setting_set $app $setting_var "${!var}"
-  done
-}
 
-ynh_configure () {
-  ynh_backup_if_checksum_is_different $2
-  ynh_render_template "${PKG_DIR}/conf/$1.j2" "$2"
-  ynh_store_file_checksum $2
-}
+    ynh_backup_if_checksum_is_different --file="$destination"
 
-# Send an email to inform the administrator
-#
-# usage: ynh_send_readme_to_admin app_message [recipients]
-# | arg: app_message - The message to send to the administrator.
-# | arg: recipients - The recipients of this email. Use spaces to separate multiples recipients. - default: root
-#	example: "root admin@domain"
-#	If you give the name of a YunoHost user, ynh_send_readme_to_admin will find its email adress for you
-#	example: "root admin@domain user1 user2"
-ynh_send_readme_to_admin() {
-	local app_message="${1:-...No specific information...}"
-	local recipients="${2:-root}"
+    # Make sure to set the permissions before we copy the file
+    # This is to cover a case where an attacker could have
+    # created a file beforehand to have control over it
+    # (cp won't overwrite ownership / modes by default...)
+    touch $destination
+    chown root:root $destination
+    chmod 640 $destination
 
-	# Retrieve the email of users
-	find_mails () {
-		local list_mails="$1"
-		local mail
-		local recipients=" "
-		# Read each mail in argument
-		for mail in $list_mails
-		do
-			# Keep root or a real email address as it is
-			if [ "$mail" = "root" ] || echo "$mail" | grep --quiet "@"
-			then
-				recipients="$recipients $mail"
-			else
-				# But replace an user name without a domain after by its email
-				if mail=$(ynh_user_get_info "$mail" "mail" 2> /dev/null)
-				then
-					recipients="$recipients $mail"
-				fi
-			fi
-		done
-		echo "$recipients"
-	}
-	recipients=$(find_mails "$recipients")
+    cp -f "$template_path" "$destination"
 
-	local mail_subject="☁️🆈🅽🅷☁️: \`$app\` was just installed!"
+    _ynh_apply_default_permissions $destination
 
-	local mail_message="This is an automated message from your beloved YunoHost server.
-Specific information for the application $app.
-$app_message
----
-Automatic diagnosis data from YunoHost
-$(yunohost tools diagnosis | grep -B 100 "services:" | sed '/services:/d')"
+    ynh_replace_vars --file="$destination"
 
-	# Define binary to use for mail command
-	if [ -e /usr/bin/bsd-mailx ]
-	then
-		local mail_bin=/usr/bin/bsd-mailx
-	else
-		local mail_bin=/usr/bin/mail.mailutils
-	fi
-
-	# Send the email to the recipients
-	echo "$mail_message" | $mail_bin -a "Content-Type: text/plain; charset=UTF-8" -s "$mail_subject" "$recipients"
+    ynh_store_file_checksum --file="$destination"
 }
