@@ -4,35 +4,40 @@ test_format = 1.0
 
 [default]
 
-    args.repository = "ssh://sam@domain.tld:22/~/backup"
-    args.passphrase = "A_Passphrase"
+    args.server = "dst.domain.tld"
+    args.ssh_user = "sam"
+    args.passphrase = "APassphrase"
     args.conf = 1
+    args.port = 2222
+    args.backup_path = "src.domain.tld"
     args.data = 1
-    args.apps = "all"
+    args.app = "all"
+    args.allow_extra_space_use = 1
     args.on_calendar = "Daily"
-    args.mailalert = "errors_only"
+    args.check_on_calendar = "*-*-8,15,22 3:15"
+    args.check_read_data_on_calendar = "*-*-1 3:15"
 
-    # -------------------------------
-    # Commits to test upgrade from
-    # -------------------------------
+#     # -------------------------------
+#     # Commits to test upgrade from
+#     # -------------------------------
 
-    [default.test_upgrade_from.d1cd666ee27f5cfb8e40c6f44a09370381b41b35]
-    name = "Older ynh 11 version"
-    args.server = "domain.tld:22"
-    args.ssh_user = "package_checker"
-    args.passphrase = "A_Passphrase"
-    args.conf = 1
-    args.data = 1
-    args.apps = "all"
-    args.on_calendar = "Daily"
-    args.mailalert = "never"
+#     [default.test_upgrade_from.d1cd666ee27f5cfb8e40c6f44a09370381b41b35]
+#     name = "Older ynh 11 version"
+#     args.server = "domain.tld:22"
+#     args.ssh_user = "package_checker"
+#     args.passphrase = "A_Passphrase"
+#     args.conf = 1
+#     args.data = 1
+#     args.apps = "all"
+#     args.on_calendar = "Daily"
+#     args.mailalert = "never"
 
 
-[local_directory]
-    args.repository = "/mnt/backup"
-    args.passphrase = "A_Passphrase"
-    args.conf = 1
-    args.data = 1
-    args.apps = "all"
-    args.on_calendar = "Daily"
-    args.mailalert = "errors_only"
+# [local_directory]
+#     args.repository = "/mnt/backup"
+#     args.passphrase = "A_Passphrase"
+#     args.conf = 1
+#     args.data = 1
+#     args.apps = "all"
+#     args.on_calendar = "Daily"
+#     args.mailalert = "errors_only"
