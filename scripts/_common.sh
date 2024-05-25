@@ -80,11 +80,9 @@ _ynh_add_config_j2() {
     chown root:root $destination
     chmod 640 $destination
 
-    cp -f "$template_path" "$destination"
+    ynh_render_template "$template_path" "$destination"
 
     _ynh_apply_default_permissions $destination
-
-    ynh_replace_vars --file="$destination"
 
     ynh_store_file_checksum --file="$destination"
 }
