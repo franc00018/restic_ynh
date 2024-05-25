@@ -22,10 +22,6 @@ Restic is a backup tool that can make local and remote backups.
 This package uses restic to make backups to a sftp server.
 The package does not handle local backups yet but you can work around that by using the local sftp server as target server (see my comment [here](https://forum.yunohost.org/t/sauvegarde-yunohost-avec-restic/10275/33)).
 
-
-**Paketatutako bertsioa:** 0.12.0~ynh9
-## Ezespena / informazio garrantzitsua
-
 ## Usage
 
 If you want to backup your server A onto the server B.
@@ -170,6 +166,7 @@ systemctl start restic_check_read_data.service
 You can setup the Restic app several times on the same server so you can backup on several server or manage your frequency backup differently for specific part of your server.
 
 
+**Paketatutako bertsioa:** 0.12.0~ynh9
 ## Dokumentazioa eta baliabideak
 
 - Aplikazioaren webgune ofiziala: <https://restic.net>
