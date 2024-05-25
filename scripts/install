@@ -38,22 +38,22 @@ mkdir -p /usr/share/yunohost/backup_method
 _ynh_add_config_j2 --template="backup_method.j2" --destination="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 chmod go=--- "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 
-_ynh_add_config_j2 --template="backup-with-restic.j2" --destination="$install_dir/backup-with-${app}"
+_ynh_add_config_j2 --template="backup-with-restic.j2" --destination="$install_dir/backup-with-restic"
 chmod u+x "$install_dir/backup-with-restic"
 
 ## Check method
-_ynh_add_config_j2 --template="check_method.j2" --destination="$install_dir/check_method_${app}"
+_ynh_add_config_j2 --template="check_method.j2" --destination="$install_dir/check_method_restic"
 
-_ynh_add_config_j2 --template="check-restic.j2" --destination="$install_dir/check-${app}"
-chmod u+x "$install_dir/check-$app"
+_ynh_add_config_j2 --template="check-restic.j2" --destination="$install_dir/check-restic"
+chmod u+x "$install_dir/check-restic"
 
 ## Backup log script
-_ynh_add_config_j2 --template="restic_log.j2" --destination="${install_dir}/restic_log_${app}"
-chmod u+x "$install_dir/restic_log_${app}"
+_ynh_add_config_j2 --template="restic_log.j2" --destination="$install_dir/restic_log"
+chmod u+x "$install_dir/restic_log"
 
 # Check log script
-_ynh_add_config_j2 --template="restic_check_log.j2" --destination="${install_dir}/restic_check_log_${app}"
-chmod u+x "$install_dir/restic_check_log_${app}"
+_ynh_add_config_j2 --template="restic_check_log.j2" --destination="$install_dir/restic_check_log"
+chmod u+x "$install_dir/restic_check_log"
 
 chown -R "$app:$app" "$install_dir"
 
