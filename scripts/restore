@@ -52,6 +52,9 @@ for suffix in "${systemd_services_suffixes[@]}"; do
     ynh_restore_file --origin_path="/etc/systemd/system/$app$suffix.service"
 	systemctl enable --quiet "$app$suffix.timer"
 	ynh_systemd_action --service="$app$suffix.timer" --action="start"
+
+    yunohost service add "$app$suffix" --description="Restic backup program ($app$suffix)" \
+        --test_status="systemctl show $app$suffix.service  -p ActiveState --value | grep -v failed"
 done
 
 #=================================================
