@@ -37,8 +37,8 @@ ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 
 if grep "${app}.timer" /etc/yunohost/services.yml > /dev/null ; then
     yunohost service remove $app.timer
-    systemctl --quiet enable $app.timer
-    systemctl start $app.timer
+    ynh_systemd_action --service="$app.timer" --action="enable"
+    ynh_systemd_action --service="$app.timer" --action="start"
 fi
 
 #=================================================
