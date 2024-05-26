@@ -5,7 +5,7 @@ __PUBLIC_KEY__
 Do so by running those commands on __SERVER__ with user __SSH_USER__:
 
 ```
-mkdir ~/.ssh 2>/dev/null
+mkdir ~/.ssh -p
 touch ~/.ssh/authorized_keys
 chmod u=rw,go= ~/.ssh/authorized_keys
 echo "__PUBLIC_KEY__" >> ~/.ssh/authorized_keys
