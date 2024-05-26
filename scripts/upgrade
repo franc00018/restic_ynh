@@ -12,159 +12,98 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
 
+if grep "${app}.timer" /etc/yunohost/services.yml > /dev/null ; then
+    yunohost service remove $app.timer
+    ynh_systemd_action --service="$app" --action="stop"
+    ynh_systemd_action --service="$app.timer" --action="disable"
+fi
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 #ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
-
-if grep "${app}.timer" /etc/yunohost/services.yml > /dev/null ; then
-    yunohost service remove $app.timer
-    ynh_systemd_action --service="$app.timer" --action="enable"
-    ynh_systemd_action --service="$app.timer" --action="start"
+# old versions did not have delimiters in ~/.ssh/config making removal in
+# multi-instance cases break the remaining instances.
+# So we need to add the delimiters if they are missing
+# The config will be re-added afterwards
+if ! grep -q "begin ${app}" $ssh_dir/config; then
+    # did not find delimiters so removing old configuration
+    sed -e "/Host ${server}/,+6d" "$ssh_dir/config" -i || true
 fi
 
 #=================================================
 # INSTALL RESTIC
 #=================================================
-ynh_script_progression --message="Installing restic binary" --weight=7
+ynh_script_progression --message="Installing Restic..." --weight=7
 
 ynh_setup_source --source_id=main --dest_dir="$install_dir"
 chmod +x "$install_dir/restic"
 
-#=================================================
-# CREATE APP USER
-#=================================================
-ynh_script_progression --message="Creating user ${app}"
+# This function will only create it if required
+_gen_and_save_public_key
 
-id ${app} 2>/dev/null || useradd -m ${app}
-ynh_script_progression --message="Configure ${app} user sudoer rights"
-cat > /tmp/${app}_sudoer << EOSUDOER
-${app} ALL = (root) NOPASSWD: /usr/bin/yunohost*, /bin/journalctl*, /usr/bin/find /etc/yunohost/apps -name backup, ${install_dir}/check_method_${app}
-EOSUDOER
-visudo -cf /tmp/${app}_sudoer && mv /tmp/${app}_sudoer /etc/sudoers.d/${app}
-ynh_script_progression --message="Move ssh keys from root to ${app} user's home"
-ynh_script_progression --message="Generate ssh config"
-set +o errexit
-set +o nounset
-export ssh_dir="/root/.ssh"
-export private_key="${ssh_dir}/id_${app}_ed25519"
-mkdir ${ssh_dir} 2>/dev/null || true
-touch ${ssh_dir}/config
-grep -q "begin ${app}" ${ssh_dir}/config
-missing_conf="$?"
-if [ "$missing_conf" -eq "1" ];then
-  cat << EOCONF >> ${ssh_dir}/config
-  # begin $app ssh config
-  Host ${server}
-    Hostname ${server}
-    Port ${port}
-    User ${ssh_user}
-    IdentityFile ${private_key}
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null
-  # end $app ssh config
-EOCONF
+# Set ssh config if it is missing
+if ! grep -q "begin $app" "/root/.ssh/config"; then
+    _set_ssh_config
 fi
-chown -R ${app}: /home/${app}
-
-
-#=================================================
-# ACTIVATE BACKUP METHODS
-#=================================================
-ynh_script_progression --message="Activating backup methods"
-
-mkdir -p /etc/yunohost/hooks.d/backup_method
-mkdir -p /usr/share/yunohost/backup_method
 
 #=================================================
 # SETUP THE BACKUP METHOD
 #=================================================
-ynh_script_progression --message="Setting up backup methods"
+ynh_script_progression --message="Setting up backup method..." --weight=1
 
-ynh_configure backup_method "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
-ynh_configure check_method "${install_dir}/check_method_${app}"
+mkdir -p /etc/yunohost/hooks.d/backup
+mkdir -p /etc/yunohost/hooks.d/backup_method
+mkdir -p /usr/share/yunohost/backup_method
 
-#=================================================
-# SETUP LOG SCRIPTS
-#=================================================
-ynh_script_progression --message="Setting up backup log script"
+## Backup method
+_ynh_add_config_j2 --template="backup_method.j2" --destination="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
+chmod go=--- "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 
-ynh_configure restic_log "${install_dir}/restic_log_${app}"
-chmod +x "${install_dir}/restic_log_${app}"
-chown ${app}: "${install_dir}/restic_log_${app}"
+_ynh_add_config_j2 --template="backup-with-restic.j2" --destination="$install_dir/backup-with-restic"
+chmod u+x "$install_dir/backup-with-restic"
 
-ynh_script_progression --message="Setting up check log script"
-ynh_configure restic_check_log "${install_dir}/restic_check_log_${app}"
-chmod +x "${install_dir}/restic_check_log_${app}"
-chown ${app}: "${install_dir}/restic_check_log_${app}"
+## Check method
+_ynh_add_config_j2 --template="check_method.j2" --destination="$install_dir/check_method_restic"
 
-#=================================================
-# CONFIGURE CRON
-#=================================================
-ynh_script_progression --message="Configuring cron" --weight=5
+_ynh_add_config_j2 --template="check-restic.j2" --destination="$install_dir/check-restic"
+chmod u+x "$install_dir/check-restic"
 
-ynh_configure backup-with-restic "/usr/local/bin/backup-with-${app}"
-ynh_configure check-restic "${install_dir}/check-${app}"
-chmod +x "/usr/local/bin/backup-with-${app}"
-chown ${app}: "/usr/local/bin/backup-with-${app}"
-chmod +x "${install_dir}/check-${app}"
-chmod +x "${install_dir}/check_method_${app}"
-ynh_add_systemd_config --service=${app} --template=systemd.service
-ynh_add_systemd_config --service=${app}_check --template=systemd_check.service
-ynh_add_systemd_config --service=${app}_check_read_data --template=systemd_check_read_data.service
-ynh_configure systemd.timer "/etc/systemd/system/${app}.timer"
-ynh_configure systemd_check.timer "/etc/systemd/system/${app}_check.timer"
-ynh_configure systemd_check_read_data.timer "/etc/systemd/system/${app}_check_read_data.timer"
-systemctl --quiet disable ${app}.service
-systemctl --quiet disable ${app}_check.service
-systemctl --quiet disable ${app}_check_read_data.service
-systemctl --quiet enable ${app}.timer
-systemctl --quiet enable ${app}_check.timer
-systemctl --quiet enable ${app}_check_read_data.timer
-systemctl start ${app}.timer
-systemctl start ${app}_check.timer
-systemctl start ${app}_check_read_data.timer
+## Backup log script
+_ynh_add_config_j2 --template="restic_log.j2" --destination="$install_dir/restic_log"
+chmod u+x "$install_dir/restic_log"
+
+# Check log script
+_ynh_add_config_j2 --template="restic_check_log.j2" --destination="$install_dir/restic_check_log"
+chmod u+x "$install_dir/restic_check_log"
+
+chown -R "$app:$app" "$install_dir"
 
 #=================================================
-# UPGRADE SSH CONFIG
+# SYSTEM CONFIGURATION
 #=================================================
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
-# old versions did not have delimiters in ~/.ssh/config
-# making removal in multi-instance cases break the remaining
-# instances.
-# So we need to add the delimiters if they are missing
-set +o errexit
-set +o nounset
-grep -q "begin ${app}" ${ssh_dir}/config
-missing_delimiters="$?"
-if [ "$missing_delimiters" -eq 1 ];then
-  # did not find delimiters so removing old configuration
-  sed -e "/Host ${server}/,+6d" ${ssh_dir}/config -i || true
-  cat << EOCONF >> ${ssh_dir}/config
-# begin $app ssh config
-Host ${server}
-  Hostname ${server}
-  Port ${port}
-  User ${ssh_user}
-  IdentityFile ${private_key}
-  StrictHostKeyChecking no
-  UserKnownHostsFile /dev/null
-# end $app ssh config
-EOCONF
-fi
+# Systemd services and timers
+for suffix in "${systemd_services_suffixes[@]}"; do
+    ynh_add_systemd_config --service="$app$suffix" --template="systemd$suffix.service"
+    _ynh_add_config_j2 --template="systemd$suffix.timer.j2" --destination="/etc/systemd/system/$app$suffix.timer"
+    ynh_systemd_action --service_name="${app}$suffix.service" --action="disable"
+    systemctl enable --quiet "${app}$suffix.timer"
+    ynh_systemd_action --service_name="${app}$suffix.timer" --action="start"
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring logrotate"
+    yunohost service add "$app$suffix" --description="Restic backup program ($app$suffix)" \
+        --test_status="systemctl show $app$suffix.service  -p ActiveState --value | grep -v failed"
+done
 
-ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.log
-ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.err
-ynh_use_logrotate --logfile=/var/log/restic_check_${app}.log
-ynh_use_logrotate --logfile=/var/log/restic_check_${app}.err
+ynh_add_config --template="sudoer" --destination="/etc/sudoers.d/$app"
+chown root:root "/etc/sudoers.d/$app"
+
+ynh_use_logrotate --logfile="/var/log/restic_backup_${app}.log"
+ynh_use_logrotate --logfile="/var/log/restic_backup_${app}.err"
+ynh_use_logrotate --logfile="/var/log/restic_check_${app}.log"
+ynh_use_logrotate --logfile="/var/log/restic_check_${app}.err"
 
 #=================================================
 # END OF SCRIPT
