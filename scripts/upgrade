@@ -21,7 +21,20 @@ fi
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-#ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
+
+if [ -f "/usr/local/bin/backup-with-${app}" ]; then
+    ynh_secure_remove --file="/usr/local/bin/backup-with-${app}"
+fi
+
+if [ -d "/opt/yunohost/$app" ]; then
+    mv "/opt/yunohost/$app/"* "/opt/yunohost/$app/".* "$install_dir"
+    ynh_secure_remove --file="/opt/yunohost/$app/check-restic"
+    ynh_secure_remove --file="/opt/yunohost/$app/check_method_restic"
+    ynh_secure_remove --file="/opt/yunohost/$app/restic_check_log_restic"
+    ynh_secure_remove --file="/opt/yunohost/$app/restic_log_restic"
+    ynh_secure_remove --file="/opt/yunohost/$app/"
+fi
 
 # old versions did not have delimiters in ~/.ssh/config making removal in
 # multi-instance cases break the remaining instances.
