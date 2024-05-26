@@ -1,79 +1,43 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
 source _common.sh
 source /usr/share/yunohost/helpers
 
-#=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-app=$YNH_APP_INSTANCE_NAME
-export final_path="/opt/yunohost/${app}"
 
 #=================================================
-# REMOVE LOGROTATE CONFIGURATION
+# REMOVE SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Removing logrotate configuration..."
+ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
+
+# Systemd services and timers
+for suffix in "${systemd_services_suffixes[@]}"; do
+    if ynh_exec_warn_less yunohost service status "$app_suffix" >/dev/null; then
+        yunohost service remove "$app_suffix"
+    fi
+    ynh_systemd_action --service_name="$app$suffix.timer" --action="stop"
+    ynh_systemd_action --service_name="$app$suffix.timer" --action="disable"
+    ynh_remove_systemd_config --service="$app$suffix"
+    ynh_secure_remove "/etc/systemd/system/$app$suffix.timer"
+done
 
 # Remove the app-specific logrotate config
 ynh_remove_logrotate
 
-#=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Removing dependencies..." --weight=4
+# Remove sudoers
+rm "/etc/sudoers.d/$app"
 
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
-
-#=================================================
-# SPECIFIC REMOVE
-#=================================================
-# REMOVE VARIOUS FILES
-#=================================================
-ynh_script_progression --message="Removing various files..." --weight=2
-
-systemctl stop ${app}.timer
-systemctl --quiet disable ${app}.timer
-ynh_remove_systemd_config --service=${app}
-ynh_remove_systemd_config --service=${app}_check
-ynh_remove_systemd_config --service=${app}_check_read_data
-ynh_secure_remove "/etc/systemd/system/${app}.timer"
-ynh_secure_remove "/etc/systemd/system/${app}_check.timer"
-ynh_secure_remove "/etc/systemd/system/${app}_check_read_data.timer"
-ynh_secure_remove "/usr/local/bin/backup-with-${app}"
 ynh_secure_remove "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
-ynh_secure_remove "${final_path}/check_method_${app}"
-ynh_secure_remove "${final_path}/check-${app}"
-ynh_secure_remove "${final_path}/restic_log_${app}"
-ynh_secure_remove "${final_path}/restic_check_log_${app}"
-ynh_secure_remove "${final_path}"
 
 #=================================================
 # REMOVE SSH CONFIG
 #=================================================
 ynh_script_progression --message="Removing ssh config"
 
-ssh_dir="/root/.ssh"
-sed -e "/begin ${app}/,/end ${app}/{/.*/d}" ${ssh_dir}/config -i || true
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Removing sudoers rights for user ${app}"
-rm /etc/sudoers.d/${app}
-
-ynh_script_progression --message="Removing ${app} user" --last
-userdel ${app}
+sed -e "/begin ${app}/,/end ${app}/{/.*/d}" /root/.ssh/config -i || true
 
 #=================================================
 # END OF SCRIPT

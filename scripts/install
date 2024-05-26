@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,187 +8,84 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-ynh_clean_setup () {
-	ynh_clean_check_starting
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-export app=$YNH_APP_INSTANCE_NAME
-export final_path="/opt/yunohost/${app}"
-
-# Retrieve arguments
-ynh_export server port ssh_user backup_path passphrase on_calendar check_on_calendar check_read_data_on_calendar conf data apps allow_extra_space_use
-
-#=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..."
 
-ynh_save_args server port ssh_user backup_path passphrase on_calendar check_on_calendar check_read_data_on_calendar conf data apps allow_extra_space_use
+# passwords aren't saved by default
+ynh_app_setting_set --app=$app --key=passphrase --value="$passphrase"
 
 #=================================================
 # INSTALL RESTIC
 #=================================================
-ynh_script_progression --message="Installing restic binary" --weight=7
+ynh_script_progression --message="Installing Restic..." --weight=7
 
-install_restic
+ynh_setup_source --source_id=main --dest_dir="$install_dir"
+chmod +x "$install_dir/restic"
 
-#=================================================
-# CREATE APP USER
-#=================================================
-ynh_script_progression --message="Creating user ${app}"
+_gen_and_save_public_key
 
-useradd -m ${app}
-
-ynh_script_progression --message="Configure ${app} user sudoer rights"
-
-cat > /tmp/${app}_sudoer << EOSUDOER
-${app} ALL = (root) NOPASSWD: /usr/bin/yunohost*, /bin/journalctl*, /usr/bin/find /etc/yunohost/apps -name backup, ${final_path}/check_method_${app}
-EOSUDOER
-visudo -cf /tmp/${app}_sudoer && mv /tmp/${app}_sudoer /etc/sudoers.d/${app}
-
-#=================================================
-# ACTIVATE BACKUP METHODS
-#=================================================
-ynh_script_progression --message="Activating backup methods"
-
-mkdir -p /etc/yunohost/hooks.d/backup_method
-mkdir -p /usr/share/yunohost/backup_method
+_set_ssh_config
 
 #=================================================
 # SETUP THE BACKUP METHOD
 #=================================================
-ynh_script_progression --message="Setting up backup methods"
+ynh_script_progression --message="Setting up backup method..." --weight=1
 
-ynh_configure backup_method "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
-ynh_configure check_method "${final_path}/check_method_${app}"
+mkdir -p /etc/yunohost/hooks.d/backup
+mkdir -p /etc/yunohost/hooks.d/backup_method
+mkdir -p /usr/share/yunohost/backup_method
 
-#=================================================
-# SETUP LOG SCRIPTS
-#=================================================
-ynh_script_progression --message="Setting up backup log script"
+## Backup method
+_ynh_add_config_j2 --template="backup_method.j2" --destination="/etc/yunohost/hooks.d/backup_method/05-${app}_app"
+chmod go=--- "/etc/yunohost/hooks.d/backup_method/05-${app}_app"
 
-ynh_configure restic_log "${final_path}/restic_log_${app}"
-chmod +x "${final_path}/restic_log_${app}"
-chown ${app}: "${final_path}/restic_log_${app}"
+_ynh_add_config_j2 --template="backup-with-restic.j2" --destination="$install_dir/backup-with-restic"
+chmod u+x "$install_dir/backup-with-restic"
 
-ynh_script_progression --message="Setting up check log script"
-ynh_configure restic_check_log "${final_path}/restic_check_log_${app}"
-chmod +x "${final_path}/restic_check_log_${app}"
-chown ${app}: "${final_path}/restic_check_log_${app}"
+## Check method
+_ynh_add_config_j2 --template="check_method.j2" --destination="$install_dir/check_method_restic"
 
-#=================================================
-# CONFIGURE CRON
-#=================================================
-ynh_script_progression --message="Configuring cron" --weight=5
+_ynh_add_config_j2 --template="check-restic.j2" --destination="$install_dir/check-restic"
+chmod u+x "$install_dir/check-restic"
 
-ynh_configure backup-with-restic "/usr/local/bin/backup-with-${app}"
-ynh_configure check-restic "${final_path}/check-${app}"
-chmod +x "/usr/local/bin/backup-with-${app}"
-chown ${app}: "/usr/local/bin/backup-with-${app}"
-chmod +x "${final_path}/check-${app}"
-chmod +x "${final_path}/check_method_${app}"
-ynh_add_systemd_config --service=${app} --template=systemd.service
-ynh_add_systemd_config --service=${app}_check --template=systemd_check.service
-ynh_add_systemd_config --service=${app}_check_read_data --template=systemd_check_read_data.service
-ynh_configure systemd.timer "/etc/systemd/system/${app}.timer"
-ynh_configure systemd_check.timer "/etc/systemd/system/${app}_check.timer"
-ynh_configure systemd_check_read_data.timer "/etc/systemd/system/${app}_check_read_data.timer"
-systemctl disable --quiet ${app}.service
-systemctl disable --quiet ${app}_check.service
-systemctl disable --quiet ${app}_check_read_data.service
-systemctl enable --quiet ${app}.timer
-systemctl enable --quiet ${app}_check.timer
-systemctl enable --quiet ${app}_check_read_data.timer
-systemctl start ${app}.timer
-systemctl start ${app}_check.timer
-systemctl start ${app}_check_read_data.timer
+## Backup log script
+_ynh_add_config_j2 --template="restic_log.j2" --destination="$install_dir/restic_log"
+chmod u+x "$install_dir/restic_log"
+
+# Check log script
+_ynh_add_config_j2 --template="restic_check_log.j2" --destination="$install_dir/restic_check_log"
+chmod u+x "$install_dir/restic_check_log"
+
+chown -R "$app:$app" "$install_dir"
 
 #=================================================
-# SET PERMISSIONS ON FINAL PATH
+# SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Set permissions on ${final_path}"
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
-chown -R ${app}: ${final_path}
+# Systemd services and timers
+for suffix in "${systemd_services_suffixes[@]}"; do
+    ynh_add_systemd_config --service="$app$suffix" --template="systemd$suffix.service"
+    _ynh_add_config_j2 --template="systemd$suffix.timer.j2" --destination="/etc/systemd/system/$app$suffix.timer"
+    ynh_systemd_action --service_name="${app}$suffix.service" --action="disable"
+    systemctl enable --quiet "${app}$suffix.timer"
+    ynh_systemd_action --service_name="${app}$suffix.timer" --action="start"
 
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring logrotate"
+    yunohost service add "$app$suffix" --description="Restic backup program ($app$suffix)" \
+        --test_status="systemctl show $app$suffix.service  -p ActiveState --value | grep -v failed"
+done
 
-ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.log
-ynh_use_logrotate --logfile=/var/log/restic_backup_${app}.err
-ynh_use_logrotate --logfile=/var/log/restic_check_${app}.log
-ynh_use_logrotate --logfile=/var/log/restic_check_${app}.err
+ynh_add_config --template="sudoer" --destination="/etc/sudoers.d/$app"
+chown root:root "/etc/sudoers.d/$app"
 
-#=================================================
-# GENERATE SSH KEY
-#=================================================
-ynh_script_progression --message="Generating private key"
+ynh_use_logrotate --logfile="/var/log/restic_backup_${app}.log"
+ynh_use_logrotate --logfile="/var/log/restic_backup_${app}.err"
+ynh_use_logrotate --logfile="/var/log/restic_check_${app}.log"
+ynh_use_logrotate --logfile="/var/log/restic_check_${app}.err"
 
-ssh_dir="/root/.ssh"
-if [ ! -d "${ssh_dir}" ];then
-  mkdir -p "${ssh_dir}"
-fi
-private_key="${ssh_dir}/id_${app}_ed25519"
-test -f $private_key || ssh-keygen -q -t ed25519 -N "" -f $private_key
-
-#=================================================
-# GENERATE SSH CONFIG
-#=================================================
-ynh_script_progression --message="Generating ssh config for ${app} server ${server}"
-
-grep -q "${app}" ${ssh_dir}/config 2>/dev/null || cat << EOCONF >> ${ssh_dir}/config
-# begin $app ssh config
-Host ${server}
-  Hostname ${server}
-  Port ${port}
-  User ${ssh_user}
-  IdentityFile ${private_key}
-  StrictHostKeyChecking no
-  UserKnownHostsFile /dev/null
-# end $app ssh config
-EOCONF
-
-#=================================================
-# Display key
-#=================================================
-ynh_script_progression --message="You should now allow the following public key for user ${ssh_user} on server ${server}:
-
-$(cat ${private_key}.pub)"
-
-#=================================================
-# SEND A README FOR THE ADMIN
-#=================================================
-ynh_script_progression --message="Sending post-installation instructions to admin" --last
-
-message="You should now allow the following public key for user ${ssh_user} on server ${server}:
-$(cat ${private_key}.pub)
-
-Do so by running those commands on ${server} with user ${ssh_user}:
-
-mkdir ~/.ssh 2>/dev/null
-touch ~/.ssh/authorized_keys
-chmod u=rw,go= ~/.ssh/authorized_keys
-cat << EOPKEY >> ~/.ssh/authorized_keys
-$(cat ${private_key}.pub)
-EOPKEY
-
-$(if [ "$backup_path" != "./" ];then echo "Also make sure ${backup_path} exists and is writable by ${ssh_user}";fi)
-
-If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/restic_ynh"
-
-ynh_send_readme_to_admin "$message" "root"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed" --last
