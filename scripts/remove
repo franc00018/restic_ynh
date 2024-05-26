@@ -18,9 +18,9 @@ for suffix in "${systemd_services_suffixes[@]}"; do
     if ynh_exec_warn_less yunohost service status "$app_suffix" >/dev/null; then
         yunohost service remove "$app_suffix"
     fi
-    ynh_systemd_action --service="$app$suffix.timer" --action="stop"
-    ynh_systemd_action --service="$app$suffix.timer" --action="disable"
-    ynh_remove_systemd_config --service="$app$suffix"
+    ynh_systemd_action --service_name="$app$suffix.timer" --action="stop"
+    ynh_systemd_action --service_name="$app$suffix.timer" --action="disable"
+    ynh_remove_systemd_config --service_name="$app$suffix"
     ynh_secure_remove "/etc/systemd/system/$app$suffix.timer"
 done
 
