@@ -42,8 +42,8 @@ ynh_script_progression --message="Restoring system configurations related to $ap
 ynh_restore_file --origin_path="/etc/sudoers.d/$app"
 chown root:root "/etc/sudoers.d/$app"
 
-ynh_restore --origin_path="/root/.ssh/id_${app}_ed25519"
-ynh_restore --origin_path="/root/.ssh/id_${app}_ed25519.pub"
+ynh_restore_file --origin_path="/root/.ssh/id_${app}_ed25519"
+ynh_restore_file --origin_path="/root/.ssh/id_${app}_ed25519.pub"
 # FIXME: restore the .ssh/config instead?
 _set_ssh_config
 
