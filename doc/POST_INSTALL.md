@@ -4,12 +4,12 @@ __PUBLIC_KEY__
 
 Do so by running those commands on __SERVER__ with user __SSH_USER__:
 
+```
 mkdir ~/.ssh 2>/dev/null
 touch ~/.ssh/authorized_keys
 chmod u=rw,go= ~/.ssh/authorized_keys
-cat << EOPKEY >> ~/.ssh/authorized_keys
-__PUBLIC_KEY__
-EOPKEY
+echo "__PUBLIC_KEY__" >> ~/.ssh/authorized_keys
+```
 
 Also make sure __BACKUP_PATH__ exists and is writable by __SSH_USER__
 
