@@ -24,6 +24,7 @@ fi
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 if [ -f "/usr/local/bin/backup-with-${app}" ]; then
+    ynh_delete_file_checksum --file="/usr/local/bin/backup-with-${app}"
     ynh_secure_remove --file="/usr/local/bin/backup-with-${app}"
 fi
 
