@@ -17,8 +17,8 @@ ynh_exec_warn find '/home/yunohost.backup/tmp/Backup_test/apps/restic/backup'
 
 ynh_restore_file --origin_path="$install_dir"
 
-ynh_setup_source --source_id=main --dest_dir="$install_dir"
-chmod +x "$install_dir/restic"
+# ynh_setup_source --source_id=main --dest_dir="$install_dir"
+# chmod +x "$install_dir/restic"
 
 chown -R "$app:$app" "$install_dir"
 
