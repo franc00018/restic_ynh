@@ -13,7 +13,7 @@ RESTIC_PATH=$(yunohost app setting {{ app }} backup_path)
 RESTIC_PASSWORD="$(yunohost app setting {{ app }} passphrase)"
 RESTIC_REPOSITORY_BASE=sftp://$RESTIC_SERVER_USER@$RESTIC_SERVER:$RESTIC_SERVER_PORT/$RESTIC_PATH/
 
-RESTIC_COMMAND=/usr/local/bin/{{ app }}
+RESTIC_COMMAND={{ install_dir }}/{{ app }}
 LOGFILE=/var/log/restic_backup_{{ app }}.log
 ERRFILE=/var/log/restic_backup_{{ app }}.err
 

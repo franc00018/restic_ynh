@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/backup-with-__APP__
-ExecStartPost=/opt/yunohost/__APP__/restic_log___APP__
+ExecStart=__INSTALL_DIR__/backup-with-__APP__
+ExecStartPost=__INSTALL_DIR__/restic_log___APP__
 User=__APP__
 Group=__APP__
 
