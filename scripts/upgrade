@@ -27,6 +27,10 @@ if [ -f "/usr/local/bin/backup-with-${app}" ]; then
     ynh_secure_remove --file="/usr/local/bin/backup-with-${app}"
 fi
 
+if [ -f "/usr/local/bin/$app" ]; then
+    ynh_secure_remove --file="/usr/local/bin/$app"
+fi
+
 if [ -d "/opt/yunohost/$app" ]; then
     mv "/opt/yunohost/$app/"* "$install_dir"
     ynh_delete_file_checksum --file="/opt/yunohost/$app/check-restic"
