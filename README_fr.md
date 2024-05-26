@@ -75,7 +75,7 @@ At the end of the installation, the app displays the public_key and the user to 
 You should now authorize the public key for user `servera` on server B by logging into server B with user `servera` and running:
 
 ```
-mkdir ~/.ssh -p 2>/dev/null
+mkdir ~/.ssh -p
 touch ~/.ssh/authorized_keys
 chmod u=rw,go= ~/.ssh/authorized_keys
 cat << EOPKEY >> ~/.ssh/authorized_keys
