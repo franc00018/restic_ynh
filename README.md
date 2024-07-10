@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Restic for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Working status](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/restic.svg)](https://ci-apps.yunohost.org/ci/apps/restic/) ![Working status](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
 
 [![Install Restic with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 

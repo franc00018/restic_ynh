@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Restic YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/restic.svg)](https://ci-apps.yunohost.org/ci/apps/restic/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
 
 [![Instalatu Restic YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 

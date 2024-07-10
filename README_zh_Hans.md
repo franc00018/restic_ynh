@@ -5,7 +5,7 @@
 
 # YunoHost 上的 Restic
 
-[![集成程度](https://dash.yunohost.org/integration/restic.svg)](https://dash.yunohost.org/appci/app/restic) ![工作状态](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
+[![集成程度](https://dash.yunohost.org/integration/restic.svg)](https://ci-apps.yunohost.org/ci/apps/restic/) ![工作状态](https://ci-apps.yunohost.org/ci/badges/restic.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/restic.maintain.svg)
 
 [![使用 YunoHost 安装 Restic](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=restic)
 
