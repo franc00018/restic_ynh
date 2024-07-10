@@ -13,3 +13,17 @@ echo "__PUBLIC_KEY__" >> ~/.ssh/authorized_keys
 ```
 
 Also make sure `__BACKUP_PATH__` exists and is writable by `__SSH_USER__`
+
+Optional: to improve security, make sure the user can only connect through SFTP and can only access its home directory on the target server.
+On Debian/Ubuntu, this is done using the following command snippet:
+
+```
+cat << EOF>> /etc/ssh/sshd_config
+Match User __SSH_USER__
+   ChrootDirectory %h
+   ForceCommand internal-sftp
+   AllowTcpForwarding no
+   X11Forwarding no
+EOF
+systemctl restart ssh
+```
